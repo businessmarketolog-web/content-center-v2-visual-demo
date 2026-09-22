@@ -57,7 +57,7 @@ function setClient(){
 function renderNav(){
  const review=items().filter(x=>x.status==='review').length;
  $('side-nav').innerHTML=nav.map(n=>'<button type="button" data-nav="'+n.id+'" class="nav-btn '+(state.view===n.id?'active':'')+'" aria-current="'+(state.view===n.id?'page':'false')+'"><span class="nav-ico" aria-hidden="true">'+n.icon+'</span>'+n.label+(n.id==='approvals'&&review?'<span class="nav-count">'+review+'</span>':'')+'</button>').join('');
- $('mobile-nav').innerHTML=nav.slice(0,5).map(n=>'<button type="button" data-nav="'+n.id+'" class="mobile-tab '+(state.view===n.id?'active':'')+'" aria-current="'+(state.view===n.id?'page':'false')+'"><span aria-hidden="true">'+n.icon+'</span>'+n.mobile+'</button>').join('');
+ $('mobile-nav').innerHTML=nav.slice(0,4).map(n=>'<button type="button" data-nav="'+n.id+'" class="mobile-tab '+(state.view===n.id?'active':'')+'" aria-current="'+(state.view===n.id?'page':'false')+'"><span aria-hidden="true">'+n.icon+'</span>'+n.mobile+'</button>').join('')+'<button type="button" data-action="more" class="mobile-tab '+(['library','results','settings'].includes(state.view)?'active':'')+'" aria-label="Дополнительные разделы"><span aria-hidden="true">⋯</span>Ещё</button>';
  const p=project();$('side-avatar').textContent=p.initials;$('side-client-name').textContent=p.name;
 }
 function image(item){return item.img||IMG.coast;}
@@ -199,6 +199,9 @@ function handoffHtml(item){
  '<div class="drawer-subhead">2. Ответ ChatGPT</div><p class="drawer-intro">Можно вставить JSON из ChatGPT или нажать «Вставить пример», чтобы проверить сценарий без переключения приложений.</p><textarea id="handoff-reply" class="json-box" aria-label="Ответ ChatGPT в JSON" placeholder="{ ... }"></textarea>'+
  '<div class="drawer-actions"><button class="soft-btn" data-action="sample-reply">Вставить пример</button><button class="soft-btn" data-action="check-reply">Проверить ответ</button></div><div id="handoff-result" aria-live="polite"></div>';
 }
+function moreHtml(){
+ return '<div class="drawer-ey">НАВИГАЦИЯ · ДЕМО</div><h2>Разделы Content Center</h2><p class="drawer-intro">Все вкладки доступны и на iPhone.</p>'+nav.slice(4).map(x=>'<button class="check-row" type="button" data-action="go-more" data-view="'+x.id+'" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:transparent;text-align:left"><span class="check-icon">'+x.icon+'</span><span class="check-copy"><strong>'+x.label+'</strong><small>Открыть раздел →</small></span></button>').join('')+'<button class="soft-btn" data-action="switch-client" style="width:100%;margin-top:18px">Сменить демо-клиента ↗</button>';
+}
 function guideHtml(){
  return '<div class="drawer-ey">ЗНАКОМСТВО С V2</div><h2>Попробуйте новый Content Center</h2><p class="drawer-intro">Это работающий интерактивный макет с вымышленными данными. Все действия ограничены этой страницей.</p>'+
  [['01','Откройте материал','На главной нажмите первую карточку из очереди, чтобы увидеть редактор и статусы.'],['02','Проверьте готовность','Откройте «Материалы», выберите карточку и нажмите «Проверить».'],['03','Попробуйте ChatGPT → карточка','Откройте черновик, выберите этот сценарий и нажмите «Вставить пример» — увидите, как правки попадают в редактор.'],['04','Откройте согласование и календарь','На согласовании можно оставить замечание и одобрить материал в деморежиме.'],['05','Переключите клиента','Убедитесь, что карточки и материалы разных демонстрационных проектов не смешиваются.']].map(row=>'<div class="tour-tip"><span class="tour-num">'+row[0]+'</span><div><strong>'+row[1]+'</strong><p>'+row[2]+'</p></div></div>').join('')+
@@ -212,6 +215,7 @@ function openDrawer(id=null,mode='detail'){
  let content;
  if(mode==='new')content=formHtml(null);
  else if(mode==='guide')content=guideHtml();
+ else if(mode==='more')content=moreHtml();
  else if(mode==='edit')content=formHtml(item);
  else if(mode==='check')content=checkHtml(item);
  else if(mode==='review')content=approvalHtml(item);
@@ -237,6 +241,8 @@ function handleAction(button){
  const action=button.dataset.action,id=button.dataset.id;
  if(action==='close'){closeDrawer();return;}
  if(action==='new'){openDrawer(null,'new');return;}
+ if(action==='more'){openDrawer(null,'more');return;}
+ if(action==='go-more'){closeDrawer();setView(button.dataset.view);return;}
  if(action==='open'){openDrawer(id);return;}
  if(action==='edit'){openDrawer(id,'edit');return;}
  if(action==='check'){openDrawer(id,'check');return;}
