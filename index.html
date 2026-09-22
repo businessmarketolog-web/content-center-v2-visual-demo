@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f6f7">
+  <meta name="description" content="Интерактивная демоверсия Content Center V2 на вымышленных данных. Не подключена к рабочим системам.">
+  <title>Content Center V2 — визуальная демоверсия</title>
+  <link rel="stylesheet" href="styles.css?v=20260923-visual1">
+  <script src="app.js?v=20260923-visual1" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Боковая навигация">
+    <div class="brand"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><strong>content<span class="brand-accent">.</span>center</strong><small>STUDIO WORKSPACE <b>V2</b></small></div></div>
+    <div class="sidebar-label">РАБОЧЕЕ ПРОСТРАНСТВО</div>
+    <button id="side-client" class="side-client" type="button" aria-label="Сменить демонстрационного клиента"><span class="client-avatar" id="side-avatar">AT</span><span class="side-client-copy"><strong id="side-client-name">Атлас Тревел</strong><small>Демо-проект</small></span><span class="chevron">⌄</span></button>
+    <nav id="side-nav" class="side-nav" aria-label="Разделы"></nav>
+    <div class="sidebar-foot"><div class="studio-orb" aria-hidden="true">✳</div><div class="foot-title">Всё в одной системе</div><p>От идеи до согласования и результата.</p><span class="foot-pill">DEMO · НЕ ПУБЛИКУЕТ</span></div>
+    <div class="sidebar-user"><div class="user-avatar">В</div><div><strong>Владелец</strong><small>Режим просмотра</small></div><span>⋯</span></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div class="top-left"><span class="top-eyebrow">CONTENT CENTER <span> / </span> <span id="breadcrumb">ГЛАВНАЯ</span></span><h1 id="page-title">Сегодня в работе</h1></div><div class="top-actions"><span class="demo-tag">ИНТЕРАКТИВНОЕ ДЕМО</span><button class="top-icon" id="search-btn" type="button" aria-label="Найти материал" title="Найти материал">⌕</button><button class="top-icon" id="notify-btn" type="button" aria-label="Уведомления" title="Уведомления">♧<i></i></button><button class="primary-btn top-create" id="create-top" type="button"><span>＋</span> Новый материал</button></div></header>
+    <div class="demo-banner" role="status"><span class="demo-pulse"></span><span><strong>Это визуальная демоверсия.</strong> Здесь вымышленные клиенты и материалы. Можно нажимать кнопки и пробовать сценарии — рабочая база, вход и публикации не затрагиваются.</span><button id="demo-help" class="banner-help" type="button">Как попробовать →</button></div>
+    <div id="view" class="page-view" aria-live="polite"></div>
+  </main>
+</div>
+<nav id="mobile-nav" class="mobile-nav" aria-label="Мобильная навигация"></nav>
+<div id="overlay" class="overlay" hidden></div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
