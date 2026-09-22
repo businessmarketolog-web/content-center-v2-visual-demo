@@ -51,7 +51,7 @@ function setView(view){
  state.view=view;state.query='';state.filter='all';render();window.scrollTo({top:0,behavior:'instant'});
 }
 function setClient(){
- state.clientId=state.clientId==='atlas'?'studio':'atlas';state.filter='all';state.query='';state.dayOffset=0;
+ const idx=state.projects.findIndex(p=>p.id===state.clientId);state.clientId=state.projects[(idx+1)%state.projects.length].id;state.filter='all';state.query='';state.dayOffset=0;
  closeDrawer();render();toast('Демо-клиент изменён. Данные проектов не смешиваются.');
 }
 function renderNav(){
@@ -82,7 +82,7 @@ function renderDashboard(){
  ].map(row=>'<button type="button" class="check-row" data-nav="'+row[3]+'" style="background:transparent;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left"><span class="check-icon">'+row[4]+'</span><span class="check-copy"><strong>'+row[0]+'</strong><small>'+row[1]+'</small></span><span class="pill-count">'+row[2]+'</span></button>').join('')+'</section><section class="panel"><div class="panel-head"><div><div class="mini-label">БЛИЖАЙШИЕ ПУБЛИКАЦИИ</div><h3>В календаре</h3></div><button class="link-btn" data-nav="calendar">Открыть ↗</button></div>'+week.map(x=>'<button type="button" class="check-row" data-action="open" data-id="'+escapeHtml(x.id)+'" style="background:transparent;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left"><span class="check-icon">◷</span><span class="check-copy"><strong>'+escapeHtml(x.title)+'</strong><small>'+fmt(x.scheduledAt)+' · '+escapeHtml(x.channel)+'</small></span><span class="task-arrow">↗</span></button>').join('')+'</section></div></div>';
 }
 function card(x){
- return '<article class="material-card"><img class="material-image" src="'+escapeHtml(image(x))+'" alt=""><div class="material-card-body"><div>'+status(x)+'</div><div class="material-title">'+escapeHtml(x.title)+'</div><div class="material-sub">'+escapeHtml(x.format)+' · '+escapeHtml(x.channel)+' · '+fmt(x.scheduledAt)+'</div><div class="material-foot"><span class="material-sub">'+escapeHtml(x.assignee||'Без исполнителя')+'</span><button type="button" data-action="open" data-id="'+escapeHtml(x.id)+'">Открыть ↗</button></div></div></article>';
+ return '<article class="material-card"><img class="material-image" src="'+escapeHtml(image(x))+'" alt=""><div class="material-card-body"><div>'+status(x)+'</div><div class="material-title">'+escapeHtml(x.title)+'</div>'+(x.bundleId?'<span class="wizard-related-badge">↔ Из серии материалов</span>':'')+'<div class="material-sub">'+escapeHtml(x.format)+' · '+escapeHtml(x.channel)+' · '+fmt(x.scheduledAt)+'</div><div class="material-foot"><span class="material-sub">'+escapeHtml(x.assignee||'Без исполнителя')+'</span><button type="button" data-action="open" data-id="'+escapeHtml(x.id)+'">Открыть ↗</button></div></div></article>';
 }
 function renderProduction(){
  const shown=items().filter(x=>(state.filter==='all'||x.status===state.filter)&&(x.title+' '+x.channel+' '+x.format).toLowerCase().includes(state.query.toLowerCase()));
@@ -114,7 +114,7 @@ function renderResults(){
  '<div class="stat-blocks"><div class="stat-block"><small>Публикации с ответом площадки</small><strong>—</strong><small>Требуется интеграция Instagram / Telegram</small></div><div class="stat-block"><small>Заявки из контента</small><strong>—</strong><small>Нужна связь с источником обращений</small></div><div class="stat-block"><small>Охват и вовлечённость</small><strong>—</strong><small>Только фактическая статистика</small></div></div>';
 }
 function renderSettings(){
- return '<div class="section-head"><div><div class="section-eyebrow">НАСТРОЙКИ ПРОЕКТА</div><h2>'+escapeHtml(project().name)+'</h2><p class="subtext">Правила бренда и интеграции будут привязаны к конкретному клиенту.</p></div><button type="button" class="soft-btn" data-action="switch-client">Сменить демо-клиента ↗</button></div>'+
+ return '<div class="section-head"><div><div class="section-eyebrow">НАСТРОЙКИ ПРОЕКТА</div><h2>'+escapeHtml(project().name)+'</h2><p class="subtext">Правила бренда и интеграции будут привязаны к конкретному клиенту.</p></div><button type="button" class="soft-btn" data-action="switch-client">Выбрать клиента ↗</button><button type="button" class="primary-btn" data-action="new-client">＋ Создать клиента</button></div>'+
  '<div class="dashboard-cols"><section class="panel"><div class="panel-head"><h3>Профиль клиента</h3></div><div class="check-row"><span class="check-icon">◇</span><span class="check-copy"><strong>Название</strong><small>'+escapeHtml(project().name)+'</small></span></div><div class="check-row"><span class="check-icon">✳</span><span class="check-copy"><strong>Направление</strong><small>'+escapeHtml(project().kind)+'</small></span></div><div class="check-row"><span class="check-icon">▤</span><span class="check-copy"><strong>Бренд-правила</strong><small>В реальном проекте подтягиваются из карточки клиента</small></span></div></section><div><section class="panel"><div class="panel-head"><h3>Подключения</h3></div><div class="check-row"><span class="check-icon">↗</span><span class="check-copy"><strong>Instagram</strong><small>В демоверсии отключён</small></span><span class="status draft">Демо</span></div><div class="check-row"><span class="check-icon">◉</span><span class="check-copy"><strong>Telegram</strong><small>В демоверсии отключён</small></span><span class="status draft">Демо</span></div></section></div></div>';
 }
 function render(){
@@ -200,11 +200,11 @@ function handoffHtml(item){
  '<div class="drawer-actions"><button class="soft-btn" data-action="sample-reply">Вставить пример</button><button class="soft-btn" data-action="check-reply">Проверить ответ</button></div><div id="handoff-result" aria-live="polite"></div>';
 }
 function moreHtml(){
- return '<div class="drawer-ey">НАВИГАЦИЯ · ДЕМО</div><h2>Разделы Content Center</h2><p class="drawer-intro">Все вкладки доступны и на iPhone.</p>'+nav.slice(4).map(x=>'<button class="check-row" type="button" data-action="go-more" data-view="'+x.id+'" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:transparent;text-align:left"><span class="check-icon">'+x.icon+'</span><span class="check-copy"><strong>'+x.label+'</strong><small>Открыть раздел →</small></span></button>').join('')+'<button class="soft-btn" data-action="switch-client" style="width:100%;margin-top:18px">Сменить демо-клиента ↗</button>';
+ return '<div class="drawer-ey">НАВИГАЦИЯ · ДЕМО</div><h2>Разделы Content Center</h2><p class="drawer-intro">Все вкладки доступны и на iPhone.</p>'+nav.slice(4).map(x=>'<button class="check-row" type="button" data-action="go-more" data-view="'+x.id+'" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:transparent;text-align:left"><span class="check-icon">'+x.icon+'</span><span class="check-copy"><strong>'+x.label+'</strong><small>Открыть раздел →</small></span></button>').join('')+'<button class="soft-btn" data-action="client-picker" style="width:100%;margin-top:18px">Выбрать клиента ↗</button><button class="primary-btn" data-action="new-client">＋ Создать клиента</button>';
 }
 function guideHtml(){
  return '<div class="drawer-ey">ЗНАКОМСТВО С V2</div><h2>Попробуйте новый Content Center</h2><p class="drawer-intro">Это работающий интерактивный макет с вымышленными данными. Все действия ограничены этой страницей.</p>'+
- [['01','Откройте материал','На главной нажмите первую карточку из очереди, чтобы увидеть редактор и статусы.'],['02','Проверьте готовность','Откройте «Материалы», выберите карточку и нажмите «Проверить».'],['03','Попробуйте ChatGPT → карточка','Откройте черновик, выберите этот сценарий и нажмите «Вставить пример» — увидите, как правки попадают в редактор.'],['04','Откройте согласование и календарь','На согласовании можно оставить замечание и одобрить материал в деморежиме.'],['05','Переключите клиента','Убедитесь, что карточки и материалы разных демонстрационных проектов не смешиваются.']].map(row=>'<div class="tour-tip"><span class="tour-num">'+row[0]+'</span><div><strong>'+row[1]+'</strong><p>'+row[2]+'</p></div></div>').join('')+
+ [['01','Создайте демо-клиента','На ПК нажмите на название клиента слева; на iPhone откройте «Ещё» → «Выбрать клиента» → «Создать клиента». Пройдите четыре шага, выбирая несколько целей, площадок и форматов.'],['02','Поставьте первую задачу','После создания клиента автоматически откроется мастер материала. Выберите Instagram и Telegram, а затем Reels, Пост и Stories: на проверке увидите четыре отдельные карточки.'],['03','Откройте материал','На главной нажмите первую карточку из очереди, чтобы увидеть редактор и статусы.'],['04','Проверьте готовность','Откройте «Материалы», выберите карточку и нажмите «Проверить».'],['05','Попробуйте ChatGPT → карточка','Откройте черновик, выберите этот сценарий и нажмите «Вставить пример» — увидите, как правки попадают в редактор.'],['06','Откройте согласование и календарь','На согласовании можно оставить замечание и одобрить материал в деморежиме.'],['07','Переключите клиента','Убедитесь, что карточки и материалы разных демонстрационных проектов не смешиваются.']].map(row=>'<div class="tour-tip"><span class="tour-num">'+row[0]+'</span><div><strong>'+row[1]+'</strong><p>'+row[2]+'</p></div></div>').join('')+
  '<div class="drawer-actions"><button class="primary-btn" data-action="close">Начать просмотр</button><button class="soft-btn" data-action="production">Открыть материалы</button></div>';
 }
 function openDrawer(id=null,mode='detail'){
@@ -240,7 +240,10 @@ function demoReply(item,ticket){
 function handleAction(button){
  const action=button.dataset.action,id=button.dataset.id;
  if(action==='close'){closeDrawer();return;}
- if(action==='new'){openDrawer(null,'new');return;}
+ if(action==='new'){CCV2Wizard.openMaterials();return;}
+ if(action==='new-client'){CCV2Wizard.openClient();return;}
+ if(action==='client-picker'){CCV2Wizard.openClients();return;}
+ if(action==='wizard-new-client'||action==='wizard-back'||action==='wizard-select-client'){CCV2Wizard.action(action,button);return;}
  if(action==='more'){openDrawer(null,'more');return;}
  if(action==='go-more'){closeDrawer();setView(button.dataset.view);return;}
  if(action==='open'){openDrawer(id);return;}
@@ -250,7 +253,7 @@ function handleAction(button){
  if(action==='handoff'){openDrawer(id,'handoff');return;}
  if(action==='guide'){openDrawer(null,'guide');return;}
  if(action==='production'){closeDrawer();setView('production');return;}
- if(action==='switch-client'){setClient();return;}
+ if(action==='switch-client'){CCV2Wizard.openClients();return;}
  if(action==='week-prev'){state.dayOffset-=7;render();return;}
  if(action==='week-next'){state.dayOffset+=7;render();return;}
  if(action==='week-today'){state.dayOffset=0;render();return;}
@@ -334,8 +337,8 @@ document.addEventListener('click',event=>{
  const action=event.target.closest('[data-action]');
  if(action){handleAction(action);return;}
 });
-$('side-client').addEventListener('click',setClient);
-$('create-top').addEventListener('click',()=>openDrawer(null,'new'));
+$('side-client').addEventListener('click',()=>CCV2Wizard.openClients());
+$('create-top').addEventListener('click',()=>CCV2Wizard.openMaterials());
 $('search-btn').addEventListener('click',()=>{
  setView('production');requestAnimationFrame(()=>$('material-search')?.focus());
 });
@@ -357,6 +360,7 @@ $('overlay').addEventListener('click',event=>{
  if(event.target===$('overlay'))closeDrawer();
 });
 $('overlay').addEventListener('submit',event=>{
+ if(event.target.id==='wizard-form'){event.preventDefault();CCV2Wizard.submit(event.target);return;}
  if(event.target.id==='material-form'||event.target.id==='comment-form'){event.preventDefault();handleFormSubmit(event.target);}
 });
 document.addEventListener('keydown',event=>{

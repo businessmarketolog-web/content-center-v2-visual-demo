@@ -1,11 +1,18 @@
-# Content Center V2 — visual demo
+# Content Center V2 — интерактивная визуальная демоверсия
 
-A **standalone interactive visual prototype** for the Content Center V2 redesign. It intentionally contains only fictional, generated sample projects and materials. It is not the Content Center production website and has **no Supabase, account, publish, ChatGPT, or Canva connection**.
+Отдельный интерфейсный макет Content Center V2 на **вымышленных данных**. Он не подключается к рабочему Content Center, Supabase, ChatGPT, Canva, Planable или соцсетям. Код владельца сюда не вводить.
 
-Open its GitHub Pages URL on iPhone or desktop, navigate sections, create/edit mock cards, run preflight checks, leave mock approval comments, switch mock clients, and try the example ChatGPT-to-existing-card review journey.
+## Что попробовать
 
-All changes live only in the current browser page memory and reset after refresh. A published status or an approval in this demo is not an external provider result. No login code or real client information belongs in this demo.
+На компьютере нажмите на имя клиента в левой панели, на iPhone — **Ещё → Выбрать клиента**. Создайте нового демо-клиента в четыре шага: название и сфера, несколько целей, площадки и форматы, подтверждение. После завершения откроется мастер первого материала. Выберите Instagram + Telegram, Reels + Пост + Stories; система покажет план и создаст **4 отдельные карточки**, связанные одной демо-задачей. Проверьте их в «Материалах», затем откройте одну карточку и попробуйте «Проверить» и «ChatGPT → карточка» с готовым примером.
 
-The actual application is developed separately in the draft pull request at https://github.com/businessmarketolog-web/content-center-gpt/pull/1 . This public prototype is for visual/UX feedback only, not approval of a live production release.
+Вы также можете пользоваться календарём, согласованием, медиатекой и демонстрационными настройками. Все изменения существуют только в памяти открытой страницы, после перезагрузки исчезают. Данные площадок, бронирования и фактические публикации в макете не подделываются.
 
-Run basic offline JS tests (Node >=20): `node --check app.js && node --test smoke.test.cjs`.
+## Разработка и безопасность
+
+Статический сайт в **отдельном** репозитории, не в рабочем content-center-gpt. Никакой настоящей авторизации, записи в Supabase или автоматической публикации. Клиентские имена, введённые в макет, не отправляются на сервер приложения, однако картинки для демо загружаются с внешнего фотохостинга.
+
+Реальное приложение отдельно дорабатывается в черновом PR:
+https://github.com/businessmarketolog-web/content-center-gpt/pull/1
+
+Проверки: \`node --check app.js && node --check wizard.js && node --check wizard-model.js && node --test smoke.test.cjs wizard.test.cjs\`.
