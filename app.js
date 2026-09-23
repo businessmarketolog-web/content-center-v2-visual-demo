@@ -87,8 +87,8 @@ function card(x){
 function renderProduction(){
  const shown=items().filter(x=>(state.filter==='all'||x.status===state.filter)&&(x.title+' '+x.channel+' '+x.format).toLowerCase().includes(state.query.toLowerCase()));
  return '<div class="section-head"><div><div class="section-eyebrow">КАРТОЧКИ МАТЕРИАЛОВ</div><h2>Всё, что находится в работе</h2><p class="subtext">Один материал — одна карточка. Нажмите, чтобы отредактировать и проверить.</p></div><button class="primary-btn" data-action="new">＋ Новый материал</button></div>'+
- '<div class="toolbar"><div class="toolbar-left"><input id="material-search" class="input search-input" type="search" value="'+escapeHtml(state.query)+'" placeholder="Поиск по материалам…" aria-label="Поиск материалов"><select id="material-filter" class="select" aria-label="Статус"><option value="all">Все статусы</option>'+Object.keys(statusLabel).map(k=>'<option value="'+k+'" '+(k===state.filter?'selected':'')+'>'+statusLabel[k]+'</option>').join('')+'</select></div><div class="segmented" role="group" aria-label="Вид материалов"><button class="seg-btn '+(state.layout==='grid'?'active':'')+'" data-action="layout" data-layout="grid">▦ Карточки</button><button class="seg-btn '+(state.layout==='list'?'active':'')+'" data-action="layout" data-layout="list">≡ Список</button></div></div>'+
- (shown.length?'<div class="'+(state.layout==='grid'?'material-grid':'list-view')+'">'+shown.map(card).join('')+'</div>':'<div class="empty"><strong>Ничего не найдено</strong>Попробуйте другой фильтр или создайте материал.</div>');
+ '<div class="toolbar"><div class="toolbar-left"><input id="material-search" class="input search-input" type="search" value="'+escapeHtml(state.query)+'" placeholder="Поиск по материалам…" aria-label="Поиск материалов"><select id="material-filter" class="select" aria-label="Статус"><option value="all">Все статусы</option>'+Object.keys(statusLabel).map(k=>'<option value="'+k+'" '+(k===state.filter?'selected':'')+'>'+statusLabel[k]+'</option>').join('')+'</select></div><div class="segmented" role="group" aria-label="Вид материалов"><button class="seg-btn '+(state.layout==='grid'?'active':'')+'" data-action="layout" data-layout="grid">▦ Карточки</button><button class="seg-btn '+(state.layout==='list'?'active':'')+'" data-action="layout" data-layout="list">≡ Список</button><button class="seg-btn '+(state.layout==='board'?'active':'')+'" data-action="layout" data-layout="board">◫ Этапы</button></div></div>'+
+ (state.layout==='board'?CCV2FlowUI.board(shown):shown.length?'<div class="'+(state.layout==='grid'?'material-grid':'list-view')+'">'+shown.map(card).join('')+'</div>':'<div class="empty"><strong>Ничего не найдено</strong>Попробуйте другой фильтр или создайте материал.</div>');
 }
 function renderCalendar(){
  const anchor=new Date();anchor.setDate(anchor.getDate()+state.dayOffset);anchor.setHours(0,0,0,0);
@@ -146,22 +146,11 @@ function formHtml(item){
     '<div class="form-two">'+field('format','Формат',draft.format,'select',['Reels','Stories','Карусель','Пост'])+field('channel','Площадка',draft.channel,'select',['Instagram','Telegram'])+'</div>'+
     field('caption','Текст публикации',prefill.caption??draft.caption,'textarea')+
     field('notes','Бриф и примечания',prefill.brief??draft.notes,'textarea')+
-    '<div class="form-two">'+field('status','Статус',draft.status,'select',['draft','production','review','approved','scheduled','failed'].map(k=>k))+field('date','Дата и время',localDatetime(draft.scheduledAt),'datetime-local')+'</div>'+
-    '<p class="drawer-note">Статусы для макета: draft — черновик, production — в работе, review — согласование, approved — одобрено, scheduled — запланировано, failed — ошибка. Выбор статуса ничего не отправляет на площадку.</p>'+
+    '<div class="form-two">'+field('status','Режим редактирования',['draft','production'].includes(draft.status)?draft.status:'production','select',['draft','production'])+'</div>'+
+    '<p class="drawer-note">Здесь доступны черновик и работа над материалом. Для согласования, одобрения и планирования откройте «Материалы → Этапы» — там проверяются правила переходов.</p>'+
     '<div class="drawer-actions"><button type="button" class="soft-btn" data-action="close">Отмена</button><button type="submit" class="primary-btn">Сохранить в демо</button></div></form>';
 }
-function qa(item){
-  const issues=[];
-  if(!item.title.trim())issues.push('Добавьте название материала.');
-  if(!item.caption.trim())issues.push('Добавьте текст публикации.');
-  if(['Reels','Stories','Карусель'].includes(item.format)&&!item.img)issues.push('Нужно прикрепить визуальный материал.');
-  if(item.scheduledAt&&Number.isNaN(new Date(item.scheduledAt).getTime()))issues.push('Укажите корректную дату публикации.');
-  if(/\[[^\]]{1,60}\]|\{\{[^}]{1,60}\}\}|TODO|TBD/i.test(item.caption))issues.push('В тексте есть незаполненный шаблон.');
-  if(/\d[\d\s.,]*\s*(?:₽|руб\.?|USD|€|\$)|\b20\d{2}\b/i.test(item.caption))issues.push('Цены и даты следует сверить с первоисточником.');
-  if(['approved','scheduled'].includes(item.status))issues.push('Проверьте, что клиент согласовал именно актуальную версию.');
-  if(item.status==='published')issues.push('Статус карточки не подтверждает реальную доставку в соцсеть.');
-  return issues;
-}
+function qa(item){return CCV2FlowData.issues(item);}
 function detailHtml(item){
  const list=qa(item);return '<div class="drawer-ey">КАРТОЧКА МАТЕРИАЛА · ДЕМО</div><h2>'+escapeHtml(item.title)+'</h2><p class="drawer-intro">'+escapeHtml(project().name)+' · '+escapeHtml(item.channel)+' · '+escapeHtml(item.format)+' · '+fmt(item.scheduledAt)+'</p><img class="drawer-preview" src="'+escapeHtml(image(item))+'" alt="Демонстрационный визуал материала">'+status(item)+
  '<div class="flow-steps"><div class="flow-step '+(item.status==='draft'?'current':'')+'">Черновик</div><div class="flow-step '+(item.status==='production'?'current':'')+'">В работе</div><div class="flow-step '+(item.status==='review'?'current':'')+'">Согласование</div><div class="flow-step '+(['approved','scheduled','published'].includes(item.status)?'current':'')+'">Готово</div></div>'+
@@ -170,7 +159,7 @@ function detailHtml(item){
  '<div class="drawer-subhead">Предпроверка</div><div class="drawer-note">'+(list.length?'Обнаружено замечаний: '+list.length+'.':'Технических замечаний не обнаружено.')+' Факты и права использования медиа необходимо подтверждать отдельно.</div>'+
  '<div class="drawer-actions"><button class="primary-btn" type="button" data-action="edit" data-id="'+escapeHtml(item.id)+'">Редактировать</button><button class="soft-btn" type="button" data-action="check" data-id="'+escapeHtml(item.id)+'">Проверить</button><button class="soft-btn" type="button" data-action="handoff" data-id="'+escapeHtml(item.id)+'">ChatGPT → карточка</button></div>'+
  '<div class="drawer-actions">'+(item.status==='review'?'<button class="soft-btn" data-action="review" data-id="'+escapeHtml(item.id)+'">Посмотреть согласование</button>':'')+
- '<button class="soft-btn" type="button" data-action="publish" data-id="'+escapeHtml(item.id)+'">Проверить публикацию ↗</button></div>';
+ '<button class="soft-btn" type="button" data-action="flow-open" data-id="'+escapeHtml(item.id)+'">Этапы производства ↗</button><button class="soft-btn" type="button" data-action="publish" data-id="'+escapeHtml(item.id)+'">Проверить публикацию ↗</button></div>';
 }
 function checkHtml(item){
  const issues=qa(item);
@@ -185,7 +174,7 @@ function approvalHtml(item){
  '<div class="drawer-subhead">Комментарии</div>'+(comments.length?comments.map(t=>'<div class="check-item"><span class="check-symbol">●</span><span>'+escapeHtml(t)+'</span></div>').join(''):'<p class="drawer-note">Комментариев пока нет. Добавьте тестовое замечание.</p>')+
  '<form id="comment-form" class="form" style="margin-top:14px"><label class="field">Новое замечание<textarea class="textarea" name="comment" placeholder="Например: заменить первый кадр" required maxlength="500"></textarea></label><button type="submit" class="soft-btn">Добавить замечание</button></form>'+
  '<div class="drawer-actions">'+(item.status==='review'?'<button class="primary-btn" data-action="approve" data-id="'+escapeHtml(item.id)+'">Одобрить в демо</button>':'')+'<button class="soft-btn" data-action="open" data-id="'+escapeHtml(item.id)+'">Назад к карточке</button></div>'+
- '<p class="drawer-note">В этой визуальной версии нет реальных ссылок для клиентов и версионной подписи согласования. Настоящие клиентские материалы не изменяются.</p>';
+ '<p class="drawer-note">Одобрение относится к текущей демоверсии материала и отменяется при изменении текста, формата или изображения. Реальных ссылок клиентам и юридически значимого согласия здесь нет.</p>';
 }
 function handoffHtml(item){
  if(!['draft','production'].includes(item.status))return '<div class="drawer-ey">CHATGPT → КАРТОЧКА</div><h2>Редактирование недоступно</h2><p class="drawer-intro">Для согласованных и запланированных материалов сначала требуется новый цикл согласования. В демоверсии выбирайте черновик или материал в работе.</p><button class="primary-btn" data-action="open" data-id="'+escapeHtml(item.id)+'">Назад к материалу</button>';
@@ -204,7 +193,7 @@ function moreHtml(){
 }
 function guideHtml(){
  return '<div class="drawer-ey">ЗНАКОМСТВО С V2</div><h2>Попробуйте новый Content Center</h2><p class="drawer-intro">Это работающий интерактивный макет с вымышленными данными. Все действия ограничены этой страницей.</p>'+
- [['01','Создайте демо-клиента','На ПК нажмите на название клиента слева; на iPhone откройте «Ещё» → «Выбрать клиента» → «Создать клиента». Пройдите четыре шага, выбирая несколько целей, площадок и форматов.'],['02','Поставьте первую задачу','После создания клиента автоматически откроется мастер материала. Выберите Instagram и Telegram, а затем Reels, Пост и Stories: на проверке увидите четыре отдельные карточки.'],['03','Откройте материал','На главной нажмите первую карточку из очереди, чтобы увидеть редактор и статусы.'],['04','Проверьте готовность','Откройте «Материалы», выберите карточку и нажмите «Проверить».'],['05','Попробуйте ChatGPT → карточка','Откройте черновик, выберите этот сценарий и нажмите «Вставить пример» — увидите, как правки попадают в редактор.'],['06','Откройте согласование и календарь','На согласовании можно оставить замечание и одобрить материал в деморежиме.'],['07','Переключите клиента','Убедитесь, что карточки и материалы разных демонстрационных проектов не смешиваются.']].map(row=>'<div class="tour-tip"><span class="tour-num">'+row[0]+'</span><div><strong>'+row[1]+'</strong><p>'+row[2]+'</p></div></div>').join('')+
+ [['01','Создайте демо-клиента','На ПК нажмите на название клиента слева; на iPhone откройте «Ещё» → «Выбрать клиента» → «Создать клиента». Пройдите четыре шага, выбирая несколько целей, площадок и форматов.'],['02','Поставьте первую задачу','После создания клиента автоматически откроется мастер материала. Выберите Instagram и Telegram, а затем Reels, Пост и Stories: на проверке увидите четыре отдельные карточки.'],['03','Откройте материал','На главной нажмите первую карточку из очереди, чтобы увидеть редактор и статусы.'],['04','Проверьте готовность','Откройте «Материалы», выберите карточку и нажмите «Проверить».'],['05','Попробуйте ChatGPT → карточка','Откройте черновик, выберите этот сценарий и нажмите «Вставить пример» — увидите, как правки попадают в редактор.'],['06','Пройдите этапы производства','В разделе «Материалы» переключите вид на «Этапы». Откройте черновик → возьмите в работу → проверьте → согласуйте текущую версию → назначьте дату. После изменения одобренного текста согласование сбросится.'],['07','Переключите клиента и проверьте календарь','Проверьте, что другие клиенты и их материалы не смешиваются, а запланированная демоверсия появляется в календаре. Никаких публикаций в соцсети не происходит.']].map(row=>'<div class="tour-tip"><span class="tour-num">'+row[0]+'</span><div><strong>'+row[1]+'</strong><p>'+row[2]+'</p></div></div>').join('')+
  '<div class="drawer-actions"><button class="primary-btn" data-action="close">Начать просмотр</button><button class="soft-btn" data-action="production">Открыть материалы</button></div>';
 }
 function openDrawer(id=null,mode='detail'){
@@ -219,6 +208,7 @@ function openDrawer(id=null,mode='detail'){
  else if(mode==='edit')content=formHtml(item);
  else if(mode==='check')content=checkHtml(item);
  else if(mode==='review')content=approvalHtml(item);
+ else if(mode==='pipeline')content=CCV2FlowUI.panel(item);
  else if(mode==='handoff')content=handoffHtml(item);
  else content=detailHtml(item);
  $('overlay').innerHTML='<section class="drawer" role="dialog" aria-modal="true" aria-label="'+(mode==='new'?'Создание материала':'Просмотр материала')+'"><div class="drawer-head"><div><span class="drawer-ey">CONTENT CENTER V2</span><h2 style="margin-bottom:0">Рабочая карточка</h2></div><button type="button" class="close-btn" data-action="close" aria-label="Закрыть">×</button></div>'+content+'</section>';
@@ -259,13 +249,14 @@ function handleAction(button){
  if(action==='week-today'){state.dayOffset=0;render();return;}
  if(action==='calendar-day'){state.dayOffset=Number(button.dataset.day)-new Date().getDate();setView('calendar');return;}
  if(action==='metric'){state.filter=button.dataset.filter||'all';state.view='production';render();return;}
- if(action==='layout'){state.layout=button.dataset.layout==='list'?'list':'grid';render();return;}
+ if(action==='layout'){state.layout=['list','board'].includes(button.dataset.layout)?button.dataset.layout:'grid';render();return;}
+ if(action==='flow-open'||action==='flow-guide'||action.startsWith('flow-')){CCV2FlowUI.action(action.slice(5),id);return;}
  if(action==='upload'){toast('Демо: загрузка файлов отключена, рабочая медиатека не затрагивается.');return;}
  if(action==='publish'){toast('Это макет. Публикации отключены — статус карточки не подтверждает отправку.');return;}
  if(action==='approve'){
-   const item=byId(id);
-   if(!item||item.status!=='review')return;
-   item.status='approved';render();openDrawer(id,'review');toast('Демо: материал одобрен только в этом макете.');return;
+   const item=byId(id);if(!item)return;
+   try{CCV2FlowUI.seed([item]);CCV2FlowData.approve(item);render();openDrawer(id,'pipeline');toast('Версия одобрена только в демоверсии.');}
+   catch(err){toast(err.message||'Не удалось одобрить версию');}return;
  }
  if(action==='copy-prompt'){
   const input=$('handoff-prompt');if(!input)return;
@@ -320,12 +311,12 @@ function handleFormSubmit(form){
    if(!title)return toast('Введите название материала.');
    let item=state.drawer?.id?byId(state.drawer.id):null;
    if(state.drawer?.id&&!item)return toast('Материал не найден.');
-   const date=data.get('date')?.toString();
-   const record={title,format:data.get('format'),channel:data.get('channel'),caption:data.get('caption')||'',notes:data.get('notes')||'',status:data.get('status')||'draft',scheduledAt:date?new Date(date).toISOString():null};
-   if(item)Object.assign(item,record);
-   else{
-     const prefix=project().id==='atlas'?'a':'b';
-     item={id:prefix+crypto.randomUUID(),img:'',assignee:'Владелец',comments:[],...record};
+   const record={title,format:data.get('format'),channel:data.get('channel'),caption:data.get('caption')||'',notes:data.get('notes')||''};
+   if(item){
+     const changed=CCV2FlowData.applyEdit(item,record);
+     if(changed&&['draft','production'].includes(item.status)&&data.get('status')==='production')item.status='production';
+   }else{
+     item={id:'draft-'+crypto.randomUUID(),client_id:state.clientId,img:'',assignee:'Владелец',comments:[],status:'draft',scheduledAt:null,version:1,events:[],...record};
      items().unshift(item);
    }
    closeDrawer();render();openDrawer(item.id);toast('Сохранено в демоверсии. Рабочие данные не менялись.');return;
