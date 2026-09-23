@@ -38,7 +38,7 @@ function createDemoClient(input,id){
 }
 function createDemoBundle(plan,clientId,bundleId,ids){
  if(!clientId||!bundleId||!Array.isArray(ids)||ids.length!==plan.variants.length||new Set(ids).size!==ids.length)throw Error('Некорректная группа материалов.');
- return plan.variants.map((variant,i)=>({id:ids[i],client_id:clientId,bundleId,title:plan.title+(plan.variants.length>1?' · '+variant.format+(variant.channel==='Telegram'?' · TG':'') :''),format:variant.format,channel:variant.channel,status:'draft',caption:plan.caption,img:'',scheduledAt:null,assignee:'Владелец',notes:plan.brief,comments:[]}));
+ return plan.variants.map((variant,i)=>({id:ids[i],client_id:clientId,bundleId,bundleTitle:plan.title,title:plan.title+(plan.variants.length>1?' · '+variant.format+(variant.channel==='Telegram'?' · TG':'') :''),format:variant.format,channel:variant.channel,status:'draft',caption:plan.caption,img:'',scheduledAt:null,assignee:'Владелец',notes:plan.brief,comments:[]}));
 }
 root.CCV2WizardData=Object.freeze({GOALS,CHANNELS,FORMATS,NICHES,normalize,validateClient,validateMaterials,createDemoClient,createDemoBundle});
 })(typeof globalThis==='undefined'?this:globalThis);

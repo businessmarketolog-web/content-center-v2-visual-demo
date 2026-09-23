@@ -90,3 +90,57 @@
 .flow-history>div:last-child{border:0;padding-bottom:0}.flow-history strong{color:#285950}
 @media(max-width:1150px){.flow-board{grid-auto-columns:minmax(205px,43%)}}
 @media(max-width:700px){.flow-board{grid-auto-columns:minmax(235px,85%);gap:9px;margin:0 -14px;padding:3px 14px 18px}.flow-board-intro{flex-direction:column;align-items:flex-start;padding:15px}.flow-board-intro h2{font-size:19px}.flow-board-intro .soft-btn{min-height:37px}.flow-mini-progress{grid-template-columns:repeat(5,minmax(80px,1fr))}.flow-actions>.primary-btn,.flow-actions>.soft-btn{flex:1;white-space:normal}}
+
+/* Stage 5 — visual series overview: one brief, independent platform materials */
+.series-titlebar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:19px}
+.series-titlebar h2{font-size:24px;letter-spacing:-.04em;margin:0 0 7px;color:#203a3b}
+.series-titlebar p{color:#86999a;line-height:1.6;font-size:12px;margin:0;max-width:600px}
+.series-overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0 0 25px}
+.series-overview-card{min-width:0;display:flex;flex-direction:column;gap:11px;text-align:left;padding:21px 23px;border:1px solid #dde9e6;background:#fff;border-radius:16px;box-shadow:var(--shadow);color:#253c3b}
+.series-overview-card:hover,.series-material:hover{border-color:#88cab7;background:#f6fbf8}
+.series-overview-top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.series-icon{width:37px;height:37px;background:#e4f4ec;color:#246b57;border-radius:11px;display:grid;place-items:center;font-size:21px}
+.series-count{font-size:10px;font-weight:750;color:#5e897d;background:#eff8f3;border-radius:6px;padding:6px 8px}
+.series-overview-card h3{margin:4px 0 0;font-size:18px;letter-spacing:-.025em;font-weight:770;line-height:1.3}
+.series-overview-card p{margin:0;font-size:11px;line-height:1.55;color:#879b9a;min-height:35px;overflow-wrap:anywhere}
+.series-progress-track{height:7px;border-radius:99px;overflow:hidden;background:#e7eeeb;width:100%}
+.series-progress-track>span{display:block;height:100%;background:#4bb699;border-radius:99px;transition:width .18s}
+.series-overview-foot{display:flex;justify-content:space-between;gap:12px;align-items:center;border-top:1px solid #edf3ef;padding-top:11px;font-size:11px;color:#7e9790}
+.series-overview-foot strong{color:#287464;white-space:nowrap;font-size:11px}
+.series-empty{grid-column:1/-1;min-height:240px;background:white;border:1px dashed #c7d9d4;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:26px;color:#789089}
+.series-empty-symbol{font-size:33px;color:#5da891}
+.series-empty strong{font-size:15px;color:#27483e}
+.series-empty p{font-size:12px;max-width:310px;line-height:1.6;margin:0 0 4px}
+.series-summary{border:1px solid #cce4d9;background:linear-gradient(115deg,#f5fcf8,#e9f6ef);border-radius:16px;padding:20px;margin-bottom:15px}
+.series-summary-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px}
+.series-summary-head strong{font-size:14px;color:#2c5647}
+.series-summary-head>span{font-size:11px;color:#648a7b}
+.series-summary .series-progress-track{height:9px;background:#cee2d8}
+.series-kpis{display:flex;gap:21px;flex-wrap:wrap;margin-top:18px}
+.series-kpis span{font-size:11px;color:#68867b;display:flex;align-items:center;gap:6px}
+.series-kpis b{font-size:18px;color:#29634e;letter-spacing:-.03em}
+.series-detail-panel{background:white;border:1px solid var(--line);border-radius:15px;padding:17px 19px;margin-bottom:15px;box-shadow:var(--shadow)}
+.series-detail-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.series-detail-top h3{font-size:15px;margin:0}
+.series-materials{display:grid;gap:8px}
+.series-material{background:#fbfdfc;border:1px solid #e8efeb;display:flex;align-items:center;gap:12px;border-radius:12px;padding:10px;width:100%;min-width:0;text-align:left}
+.series-material>img{width:67px;height:62px;flex:none;object-fit:cover;border-radius:9px;background:#dfede7}
+.series-material-body{flex:1;min-width:0}
+.series-material-body strong{display:block;font-size:12px;line-height:1.4;color:#28443b;overflow-wrap:anywhere}
+.series-material-body small{display:block;font-size:10px;line-height:1.45;color:#8fa29b;margin-top:6px}
+.series-state{font-size:10px;font-weight:750;color:#68867c;padding:5px 8px;background:#eff5f1;border-radius:7px;flex:none;max-width:150px;line-height:1.35}
+.series-state.state-review{background:#fff2dd;color:#a67a2c}
+.series-state.state-approved,.series-state.state-scheduled{background:#def3e8;color:#307454}
+.series-state.state-failed{background:#fcece5;color:#ae6547}
+.series-chevron{font-size:17px;color:#8eb3a8}
+.series-inline{display:block;width:fit-content;max-width:100%;background:#eaf6f0;border:1px solid #d1e9dc;border-radius:9px;padding:11px 13px;margin:13px 0;font-size:12px;font-weight:750;color:#2b765c;text-align:left}
+.series-inline:hover{background:#dff2e7;border-color:#83bea5}
+.series-teaser{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;margin:-3px 0 18px;border:1px solid #d3e9df;background:#f0faf5;border-radius:13px}
+.series-teaser>div{display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 10px;min-width:0;align-items:center}
+.series-teaser>div>span{grid-row:1/3;display:grid;place-items:center;background:#d9efe4;color:#327963;border-radius:8px;width:34px;height:34px;font-size:19px}
+.series-teaser strong{font-size:12px;line-height:1.3;color:#2d5846;overflow-wrap:anywhere}
+.series-teaser small{font-size:11px;line-height:1.4;color:#789788;overflow-wrap:anywhere}
+.series-teaser .soft-btn{background:white;white-space:nowrap;color:#2d755a}
+@media(max-width:850px){.series-overview-grid{grid-template-columns:1fr}.series-titlebar{align-items:flex-start;flex-direction:column}.series-summary-head{align-items:flex-start;flex-direction:column}.series-material{flex-wrap:wrap}.series-state{margin-left:79px}}
+@media(max-width:700px){.series-titlebar h2{font-size:21px}.series-titlebar .primary-btn,.series-titlebar .soft-btn{width:100%}.series-overview-card{padding:18px}.series-summary{padding:16px}.series-kpis{gap:12px}.series-kpis span{font-size:10px}.series-detail-panel{padding:13px}.series-state{margin-left:79px}.series-teaser{flex-direction:column;align-items:stretch;padding:13px}.series-teaser .soft-btn{width:100%}}
+@media(prefers-reduced-motion:reduce){.series-progress-track>span{transition:none}}

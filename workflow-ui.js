@@ -66,7 +66,7 @@ function panel(item){
  '<div class="flow-mini-progress">'+D.STAGES.map((stage,i)=>'<span class="'+(stage===item.status?'active':D.STAGES.indexOf(item.status)>i?'done':'')+'">'+e(D.LABELS[stage])+'</span>').join('')+'</div>'+
  '<div class="drawer-subhead">Проверка перед следующим шагом</div>'+warning+
  '<div class="drawer-subhead">Следующее действие</div><div class="flow-actions">'+actions+'</div>'+
- '<div class="drawer-subhead">История демоматериала</div><div class="flow-history">'+(item.events.length?item.events.slice(0,7).map(h=>'<div><strong>Версия '+h.version+'</strong> '+e(h.desc)+'</div>').join(''):'<div>Материал добавлен в демонстрационную систему.</div>')+'</div>'+
+ (item.bundleId?'<button class="series-inline" type="button" data-action="series-open" data-id="'+e(item.bundleId)+'">▤ К остальным материалам серии ↗</button>':'')+'<div class="drawer-subhead">История демоматериала</div><div class="flow-history">'+(item.events.length?item.events.slice(0,7).map(h=>'<div><strong>Версия '+h.version+'</strong> '+e(h.desc)+'</div>').join(''):'<div>Материал добавлен в демонстрационную систему.</div>')+'</div>'+
  '<p class="drawer-note">Статусы и согласования в этом макете — только иллюстрация процесса. Подтверждения клиента и фактической публикации здесь нет.</p>';
 }
 function fail(msg){toast(msg);}
