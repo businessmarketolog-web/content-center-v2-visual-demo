@@ -1,0 +1,25 @@
+name: Content Center V2 mock preview browser check
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'review/**'
+      - '.github/workflows/v2-review-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mock-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runner
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test standalone mock V2 for desktop and mobile
+        run: node review/browser-smoke.cjs
