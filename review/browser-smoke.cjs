@@ -27,6 +27,26 @@ function server(){return http.createServer((req,res)=>{
    await page.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:')?route.continue():route.abort('blockedbyclient'));
    await page.goto('http://127.0.0.1:'+host.address().port+'/?workspace=v2',{waitUntil:'load'});
    await page.locator('#dashboard .ccv2-shell').waitFor({timeout:15000});
+   // Exercise the real V2 drawer: a locally edited deadline must survive GPT handoff.
+   const handoffButton=page.locator('[data-ccv2-handoff]').first();
+   await handoffButton.waitFor();
+   const handoffId=await handoffButton.getAttribute('data-ccv2-handoff');
+   const handoffClient=await page.locator('#client').inputValue();
+   await handoffButton.click();
+   const handoffPrompt=await page.locator('#ccv2-handoff textarea[readonly]').inputValue();
+   const requestId=handoffPrompt.match(/"request_id":"([0-9a-f-]+)"/i)?.[1];
+   assert.ok(requestId,'handoff request ID must be present');
+   await page.locator('#ccv2-handoff textarea:not([readonly])').fill(JSON.stringify({
+    schema:'content-center-handoff/1',request_id:requestId,client_id:handoffClient,
+    content_item_id:handoffId,changes:{caption:'Безопасно улучшенный текст'}
+   }));
+   await page.locator('#ccv2-handoff button',{hasText:'Проверить ответ'}).click();
+   assert.equal(await page.locator('#ccv2-handoff button',{hasText:'Перенести в редактор'}).isEnabled(),true);
+   await page.evaluate(id=>{openDrawer(id);document.getElementById('dDue').value='2026-10-19T15:00';},handoffId);
+   await page.evaluate(()=>document.querySelector('#ccv2-handoff button.ccv2-create').click());
+   assert.match(await page.locator('#ccv2-handoff .ccv2-handoff-message').innerText(),/несохранённые правки/i);
+   assert.equal(await page.locator('#dDue').inputValue(),'2026-10-19T15:00');
+   await page.evaluate(()=>closeDrawer());
    assert.equal(await page.locator('#authLayer.on').count(),0,'mock owner login failed');
    assert.equal(await page.locator('#clientCreateBtnV9').count(),1);
    assert.match(await page.locator('#ccv2-review-notice').innerText(),/ТЕСТОВАЯ V2/);
