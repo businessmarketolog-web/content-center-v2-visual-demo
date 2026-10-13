@@ -1,0 +1,37 @@
+name: Content Center V2 live-auth review safety
+on:
+  push:
+    branches: [main]
+    paths: ['auth-review/**', '.github/workflows/auth-review-checks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate guard and all auth-review JavaScript
+        run: |
+          for file in auth-review/*.js auth-review/v2/*.js auth-review/tests/*.cjs; do node --check "$file"; done
+          node --test auth-review/tests/safety-gate.test.cjs
+  browser:
+    strategy:
+      fail-fast: false
+      matrix: {engine: [chromium, webkit]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Playwright
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+      - name: Install browser
+        run: npx playwright install --with-deps ${{ matrix.engine }}
+      - name: Run auth review smoke with fake backend and no external traffic
+        env: {BROWSER_ENGINE: '${{ matrix.engine }}'}
+        run: node auth-review/tests/browser-smoke.cjs
