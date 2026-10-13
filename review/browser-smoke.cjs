@@ -26,7 +26,8 @@ function server(){return http.createServer((req,res)=>{
    const page=await ctx.newPage();const failures=[];
    page.on('pageerror',error=>failures.push(error.message));
    await page.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:')?route.continue():route.abort('blockedbyclient'));
-   await page.goto('http://127.0.0.1:'+host.address().port+'/?workspace=v2',{waitUntil:'load'});
+   await page.goto('http://127.0.0.1:'+host.address().port+'/',{waitUntil:'load'});
+   assert.equal(new URL(page.url()).searchParams.get('workspace'),'v2','public preview bare URL must activate V2 automatically');
    await page.locator('#dashboard .ccv2-shell').waitFor({timeout:15000});
    // Exercise the real V2 drawer: a locally edited deadline must survive GPT handoff.
    const handoffButton=page.locator('[data-ccv2-handoff]').first();
