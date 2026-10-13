@@ -10,6 +10,11 @@ permissions:
   contents: read
 jobs:
   mock-preview:
+    name: Browser mock preview / ${{ matrix.engine }}
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -20,6 +25,8 @@ jobs:
       - name: Install browser runner
         run: npm install --no-save --no-package-lock playwright@1.56.1
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps ${{ matrix.engine }}
       - name: Test standalone mock V2 for desktop and mobile
+        env:
+          BROWSER_ENGINE: ${{ matrix.engine }}
         run: node review/browser-smoke.cjs

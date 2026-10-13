@@ -4,7 +4,8 @@ const assert=require('node:assert/strict');
 const http=require('node:http');
 const fs=require('node:fs');
 const path=require('node:path');
-const {chromium}=require('playwright');
+const {chromium,webkit}=require('playwright');
+const engine=process.env.BROWSER_ENGINE==='webkit'?'webkit':'chromium';
 const root=__dirname;
 const mime={'.js':'application/javascript','.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png'};
 function server(){return http.createServer((req,res)=>{
@@ -18,7 +19,7 @@ function server(){return http.createServer((req,res)=>{
 });}
 (async()=>{
  const host=server();await new Promise(done=>host.listen(0,'127.0.0.1',done));
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const browser=await (engine==='webkit'?webkit:chromium).launch({headless:true,...(engine==='chromium'?{args:['--no-sandbox']}: {})});
  try{
   for(const device of [{name:'desktop',width:1365,height:900},{name:'mobile',width:390,height:844}]){
    const ctx=await browser.newContext({viewport:{width:device.width,height:device.height},serviceWorkers:'block'});
@@ -63,6 +64,29 @@ function server(){return http.createServer((req,res)=>{
    await page.waitForFunction(()=>document.querySelectorAll('#client option').length===3);
    await page.locator('#clientManagerV9.on').waitFor({state:'hidden'});
    assert.equal(await page.locator('#contentModal.on').count(),0,'declined create-first-item must not auto-create content');
+   // New material uses the existing single client record and duplicate checks.
+   const createdClientId=await page.locator('#client').inputValue();
+   const materialTitle='Тест первого материала '+engine+' '+device.name;
+   await page.locator('#addBtn').click();
+   await page.locator('#fTitle').fill(materialTitle);
+   await page.locator('#fFormat').selectOption('Post');
+   await page.locator('#fChannel').selectOption('Telegram');
+   await page.locator('#fCaption').fill('Демонстрационный текст');
+   await page.locator('#saveAdd').click();
+   await page.waitForFunction(title=>state.content.some(x=>x.title===title),materialTitle);
+   assert.equal(await page.evaluate(title=>state.content.filter(x=>x.title===title).length,materialTitle),1);
+   assert.equal(await page.evaluate(title=>state.content.find(x=>x.title===title)?.client_id,materialTitle),createdClientId);
+   await page.locator('#addBtn').click();
+   await page.locator('#fTitle').fill(materialTitle);
+   await page.locator('#fFormat').selectOption('Post');
+   await page.locator('#fChannel').selectOption('Telegram');
+   page.once('dialog',dialog=>dialog.dismiss());
+   await page.locator('#saveAdd').click();
+   assert.equal(await page.evaluate(title=>state.content.filter(x=>x.title===title).length,materialTitle),1,'duplicate rejected');
+   await page.evaluate(()=>closeAdd(true));
+   await page.locator('#client').selectOption('11111111-1111-4111-8111-111111111111');
+   await page.waitForFunction(id=>state.clientId===id,'11111111-1111-4111-8111-111111111111');
+   assert.equal(await page.evaluate(title=>state.content.some(x=>x.title===title),materialTitle),false,'client isolation failed');
    assert.equal(failures.length,0,device.name+' JS errors: '+failures.join('; '));
    console.log('PASS',device.name,'mock-only owner, workspace, client wizard and save');
    await ctx.close();
