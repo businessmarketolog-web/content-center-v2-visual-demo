@@ -73,7 +73,7 @@ test('real-client selection cannot create any content even if client_id forged',
 });
 test('edit allowed only for selected QA item; delete and other tables blocked',async()=>{
  const h=harness();
- await h.call('/rest/v1/content_items?id=eq.'+itemId,'PATCH',{title:'Edited'});
+ await h.call('/rest/v1/content_items?id=eq.'+itemId,'PATCH',{title:'Edited',media_urls:[],scheduled_at:null,due_at:null});
  await assert.rejects(h.call('/rest/v1/content_items?id=eq.'+prodId,'PATCH',{title:'Wrong'}),/только материалы/);
  await assert.rejects(h.call('/rest/v1/content_items?id=eq.'+itemId,'PATCH',{status:'published'}),/нельзя менять/);
  await assert.rejects(h.call('/rest/v1/content_items?id=eq.'+itemId,'DELETE'),/заблокирована/);

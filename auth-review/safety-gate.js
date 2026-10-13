@@ -53,7 +53,7 @@
         if(!body||typeof body!=='object'||Array.isArray(body)||
           (body.client_id&&body.client_id!==client.id)||
           (body.status&&body.status!=='draft')||
-          body.scheduled_at||body.due_at||body.media_urls)
+          body.scheduled_at||body.due_at||(body.media_urls&&(!Array.isArray(body.media_urls)||body.media_urls.length>0)))
           return error('нельзя менять клиента, публиковать, назначать дату или вложения');
         return nativeFetch(req);
       }
